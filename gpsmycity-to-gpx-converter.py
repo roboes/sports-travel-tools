@@ -1,5 +1,5 @@
 ## GPSmyCity to GPX converter
-# Last update: 2022-04-12
+# Last update: 2022-05-07
 
 
 # Erase all declared global variables
@@ -26,7 +26,7 @@ os.chdir(os.path.join(os.path.expanduser('~'), r'Downloads'))
 
 def gpsmycity_importer(url):
 
-    page_source = urlopen(url).read().decode('utf-8')
+    page_source = urlopen(url).read().decode('utf8')
     page_source = page_source.split('\n')
 
     # tour_name
@@ -54,22 +54,28 @@ def gpsmycity_importer(url):
 
     ## df_segments
 
-    # Split columns
-    df_segments['path'] = df_segments['path'].str.strip('[\']')
-    df_segments[['latitude', 'longitude']] = df_segments['path'].str.split('\', \'', expand=True)
-    df_segments = df_segments.drop(columns=['path'])
+    if df_segments.drop_duplicates().shape == (1, 1) and df_segments.drop_duplicates()['path'][0] == 'None':
+        pass
 
-    # Change dtypes
-    df_segments['latitude'] = pd.to_numeric(df_segments['latitude'])
-    df_segments['longitude'] = pd.to_numeric(df_segments['longitude'])
+    else:
+        # Split columns
+        df_segments['path'] = df_segments['path'].str.strip('[\']')
+        df_segments[['latitude', 'longitude']] = df_segments['path'].str.split('\', \'', expand=True)
+        df_segments = df_segments.drop(columns=['path'])
+
+        # Change dtypes
+        df_segments['latitude'] = pd.to_numeric(df_segments['latitude'])
+        df_segments['longitude'] = pd.to_numeric(df_segments['longitude'])
 
 
     ## df_waypoints
 
     # Split columns
     df_waypoints['pins'] = df_waypoints['pins'].str.strip('[\']')
-    df_waypoints[['latitude', 'longitude', 'name', 'number', 'id']] = df_waypoints['pins'].str.split('\', "|\', \'|", \'', expand=True)
-    df_waypoints = df_waypoints.drop(columns=['pins', 'number', 'id'])
+
+    # df_waypoints[['latitude', 'longitude', 'name', 'number', 'id']] = df_waypoints['pins'].str.split('\', "|\', \'|", \'', expand=True)
+    # df_waypoints = df_waypoints.drop(columns=['pins', 'number', 'id'])
+    df_waypoints[['latitude', 'longitude', 'name']] = df_waypoints['pins'].str.split('\', "|\', \'|", \'', expand=True).iloc[:, 0:3]
 
     # Change dtypes
     df_waypoints['latitude'] = pd.to_numeric(df_waypoints['latitude'])
@@ -90,16 +96,20 @@ def gpsmycity_importer(url):
     gpx_track.segments.append(gpx_segment)
 
     # Write segments to .gpx
-    for row in df_segments.index:
-       gpx_segment.points.append(gpxpy.gpx.GPXTrackPoint(latitude=df_segments.loc[row, 'latitude'], longitude=df_segments.loc[row, 'longitude']))
+    if df_segments.drop_duplicates().shape == (1, 1) and df_segments.drop_duplicates()['path'][0] == 'None':
+        pass
+
+    else:
+        for row in df_segments.index:
+           gpx_segment.points.append(gpxpy.gpx.GPXTrackPoint(latitude=df_segments.loc[row, 'latitude'], longitude=df_segments.loc[row, 'longitude']))
 
     # Write waypoints to .gpx
     for row in df_waypoints.index:
        gpx.waypoints.append(gpxpy.gpx.GPXWaypoint(name=df_waypoints.loc[row, 'name'], latitude=df_waypoints.loc[row, 'latitude'], longitude=df_waypoints.loc[row, 'longitude']))
 
     # Save .gpx file
-    with open('{}.gpx'.format(secure_filename(tour_name)), 'w') as f:
-        f.write(gpx.to_xml())
+    with open('{}.gpx'.format(secure_filename(tour_name)), 'w', encoding='utf8') as file:
+        file.write(gpx.to_xml())
 
 
 
@@ -109,7 +119,8 @@ def gpsmycity_importer(url):
 
 # List of tours to be imported
 url_list = ['https://www.gpsmycity.com/tours/munich-introduction-walking-tour-6446.html',
-'https://www.gpsmycity.com/tours/edinburgh-introduction-walking-tour-6397.html']
+    'https://www.gpsmycity.com/blog/main-sights-to-see-in-augsburg-3414.html',
+    'https://www.gpsmycity.com/tours/edinburgh-introduction-walking-tour-6397.html']
 
 for index in url_list:
     gpsmycity_importer(index)
