@@ -1,6 +1,6 @@
 # Strava Recommended Settings
 
-Just click in the URL to open the settings directly in the Strava app for Android/iOS or in Strava web.
+Just click in the URL to open the settings directly in the Strava app for Android/iOS/Web.
 
 ### [Profile](https://www.strava.com/settings/profile)
 
