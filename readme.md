@@ -28,6 +28,7 @@ This repository contains sports and travel tools and tips (including apps and ut
 [Komoot](https://www.komoot.com/discover): to download routes as .gpx files, see the [Komoot](#komoot) section.  
 [AllTrails](https://www.alltrails.com/explore): requires login to download routes as .gpx.  
 [Outdooractive](https://www.outdooractive.com/en/routes/): requires login to download routes as .gpx.  
+[Hiking Buddies](https://www.hiking-buddies.com/routes/routes_list/): does not require a login to download routes as .gpx.  
 
 Files can be downloaded as a .gpx files and imported in apps (see [here](#apps)) or fitness devices (e.g. Garmin devices).
 
